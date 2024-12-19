@@ -2,7 +2,7 @@
 
 import { program } from 'commander'
 import DuplicateFinder from './DuplicateFinder.js'
-import chalk from 'chalk'
+import chalk, { ChalkInstance } from 'chalk'
 import { select } from '@inquirer/prompts'
 import { exec } from 'child_process'
 import trash from 'trash'
@@ -19,6 +19,54 @@ function genId(index: number) {
     const secondChar = Math.ceil(index / alphabetLength)
 
     return `${firstChar}${secondChar}`
+}
+
+function generateChoices(value: string, color: ChalkInstance, files: string[]) {
+    return files.map((file, i) => ({
+        name: color(`[${genId(i)}] Keep ${file}`),
+        description: 'Keep this file and delete the others',
+        value: `${value}_${file}`,
+    }))
+}
+
+async function handleKeep(action: string, files: string[], deleted: string[]) {
+    const file = action.replace('keep_', '')
+    const otherFiles = files.filter((f) => f !== file)
+
+    for (const otherFile of otherFiles) {
+        deleted.push(otherFile)
+
+        await trash(otherFile)
+    }
+
+    console.log(chalk.greenBright(`Keeping ${file}\n`))
+}
+
+async function handleDelete(action: string, files: string[], deleted: string[]) {
+    const file = action.replace('delete_', '')
+
+    deleted.push(file)
+
+    await trash(file)
+
+    console.log(chalk.redBright(`Deleted ${file}\n`))
+}
+
+function handleOpen(action: string) {
+    const file = action.replace('open_', '')
+
+    // detect user OS
+    const isWindows = process.platform === 'win32'
+
+    if (isWindows) {
+        exec(`start "" "${file}"`)
+
+        console.log(chalk.blueBright(`Opening ${file}\n`))
+
+        return
+    }
+
+    console.log(chalk.redBright(`Only Windows is supported for now\n`))
 }
 
 program.name('Dufi').description('Find and manage duplicate files').version('0.0.1')
@@ -42,7 +90,7 @@ program
 
         let currentDuplicateIndex = 0
         let finished = false
-        const deleted = []
+        const deleted: string[] = []
 
         while (!finished) {
             const duplicate = duplicates[currentDuplicateIndex]
@@ -51,24 +99,12 @@ program
                 message: `${currentDuplicateIndex + 1}/${duplicates.length} What do you want to do with these files?`,
                 choices: [
                     { name: chalk.blueBright('Skip'), description: 'Skip this duplicates', value: 'skip' },
-                    ...duplicate.files.map((file, i) => ({
-                        name: chalk.greenBright(`[${genId(i)}] Keep ${file}`),
-                        description: 'Keep this file and delete the others',
-                        value: `keep_${file}`,
-                    })),
-                    ...duplicate.files.map((file, i) => ({
-                        name: chalk.redBright(`[${genId(i)}] Delete ${file}`),
-                        description: 'Delete this file and keep the others',
-                        value: `delete_${file}`,
-                    })),
-                    ...duplicate.files.map((file, i) => ({
-                        name: chalk.blueBright(`[${genId(i)}] Open ${file}`),
-                        description: 'Open this file or its folder',
-                        value: `open_${file}`,
-                    })),
+                    ...generateChoices('keep', chalk.greenBright, duplicate.files),
+                    ...generateChoices('delete', chalk.redBright, duplicate.files),
+                    ...generateChoices('open', chalk.blueBright, duplicate.files),
                 ],
                 default: 'skip',
-                loop: false,
+                pageSize: 30,
             })
 
             if (action === 'skip') {
@@ -76,37 +112,15 @@ program
 
                 currentDuplicateIndex += 1
             } else if (action.startsWith('keep_')) {
-                const file = action.replace('keep_', '')
-                const otherFiles = duplicate.files.filter((f) => f !== file)
-
-                for (const otherFile of otherFiles) {
-                    deleted.push(otherFile)
-                    await trash(otherFile)
-                }
+                await handleKeep(action, duplicate.files, deleted)
 
                 currentDuplicateIndex += 1
-
-                console.log(chalk.greenBright(`Keeping ${file}\n`))
             } else if (action.startsWith('delete_')) {
-                const file = action.replace('delete_', '')
+                await handleDelete(action, duplicate.files, deleted)
 
-                deleted.push(file)
-                await trash(file)
                 currentDuplicateIndex += 1
-
-                console.log(chalk.redBright(`Deleted ${file}\n`))
             } else if (action.startsWith('open_')) {
-                const file = action.replace('open_', '')
-
-                // detect user OS
-                const isWindows = process.platform === 'win32'
-
-                if (isWindows) {
-                    exec(`start "" "${file}"`)
-                    console.log(chalk.blueBright(`Opening ${file}\n`))
-                }
-
-                console.log(chalk.redBright(`Only Windows is supported for now\n`))
+                handleOpen(action)
             }
 
             finished = currentDuplicateIndex >= duplicates.length
