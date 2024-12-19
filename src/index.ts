@@ -5,7 +5,7 @@ import DuplicateFinder from './DuplicateFinder.js'
 import chalk, { ChalkInstance } from 'chalk'
 import { select } from '@inquirer/prompts'
 import { exec } from 'child_process'
-import trash from 'trash'
+import fs from 'fs'
 
 function genId(index: number) {
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -22,9 +22,20 @@ function genId(index: number) {
 }
 
 function generateChoices(value: string, color: ChalkInstance, files: string[]) {
+    const name: Record<string, string> = {
+        keep: 'Keep',
+        delete: 'Delete',
+        open: 'Open',
+    }
+    const description: Record<string, string> = {
+        keep: 'Keep this file and delete the others',
+        delete: 'Delete this file',
+        open: 'Open this file (Windows only)',
+    }
+
     return files.map((file, i) => ({
-        name: color(`[${genId(i)}] Keep ${file}`),
-        description: 'Keep this file and delete the others',
+        name: color(`[${genId(i)}] ${name[value]} ${file}`),
+        description: description[value],
         value: `${value}_${file}`,
     }))
 }
@@ -36,7 +47,7 @@ async function handleKeep(action: string, files: string[], deleted: string[]) {
     for (const otherFile of otherFiles) {
         deleted.push(otherFile)
 
-        await trash(otherFile)
+        fs.unlinkSync(otherFile)
     }
 
     console.log(chalk.greenBright(`Keeping ${file}\n`))
@@ -47,7 +58,7 @@ async function handleDelete(action: string, files: string[], deleted: string[]) 
 
     deleted.push(file)
 
-    await trash(file)
+    fs.unlinkSync(file)
 
     console.log(chalk.redBright(`Deleted ${file}\n`))
 }
@@ -69,6 +80,38 @@ function handleOpen(action: string) {
     console.log(chalk.redBright(`Only Windows is supported for now\n`))
 }
 
+function handleScan(folder: string) {
+    process.stdout.clearLine(0)
+    process.stdout.cursorTo(0)
+    process.stdout.write(chalk.whiteBright(`Scanning ${folder}...`))
+}
+
+function handleScanResult(folder: string, files: string[]) {
+    process.stdout.clearLine(0)
+    process.stdout.cursorTo(0)
+    process.stdout.write(chalk.whiteBright(`Found ${files.length} files in ${folder}`))
+}
+
+function handleFiles(files: string[]) {
+    process.stdout.clearLine(0)
+    process.stdout.cursorTo(0)
+    process.stdout.write(chalk.whiteBright(`Found ${files.length} files`))
+}
+
+function handleProgress(iteration: number, total: number, file: string, hash: string) {
+    if (iteration % 32 !== 0 && iteration !== total) {
+        return
+    }
+
+    if (iteration === 1) {
+        process.stdout.write('\n')
+    }
+
+    process.stdout.clearLine(0)
+    process.stdout.cursorTo(0)
+    process.stdout.write(chalk.whiteBright(`[${iteration}/${total}] ${file} (${hash.slice(0, 8)}...)`))
+}
+
 program.name('Dufi').description('Find and manage duplicate files').version('0.0.1')
 
 program
@@ -83,10 +126,16 @@ program
             extensions: options.extensions,
             bytes: parseInt(options.bytes),
         })
+
+        finder.on('scan', handleScan)
+        finder.on('scan-result', handleScanResult)
+        finder.on('files', handleFiles)
+        finder.on('progress', handleProgress)
+
         const duplicates = await finder.run()
         const endTime = Date.now()
 
-        console.log(chalk.greenBright.bold(`Found ${duplicates.length} duplicates in ${((endTime - startTime) / 1000).toFixed(2)}s\n`))
+        console.log(chalk.greenBright.bold(`\nFound ${duplicates.length} duplicates in ${((endTime - startTime) / 1000).toFixed(2)}s\n`))
 
         let currentDuplicateIndex = 0
         let finished = false
@@ -94,6 +143,8 @@ program
 
         while (!finished) {
             const duplicate = duplicates[currentDuplicateIndex]
+
+            if (!duplicate) break
 
             const action = await select({
                 message: `${currentDuplicateIndex + 1}/${duplicates.length} What do you want to do with these files?`,

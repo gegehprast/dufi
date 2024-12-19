@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
+import EventEmitter from 'events'
 
 interface Options {
     folders: string[]
@@ -8,7 +9,14 @@ interface Options {
     bytes?: number
 }
 
-export class DuplicateFinder {
+export interface DuplicateFinder {
+    on(event: 'scan', listener: (folder: string) => void): this
+    on(event: 'scan-result', listener: (folder: string, files: string[]) => void): this
+    on(event: 'files', listener: (files: string[]) => void): this
+    on(event: 'progress', listener: (iteration: number, total: number, file: string, hash: string) => void): this
+}
+
+export class DuplicateFinder extends EventEmitter {
     private folders: string[]
     private extensions: string[]
     private bytes: number
@@ -16,6 +24,8 @@ export class DuplicateFinder {
     public duplicates: string[] = []
 
     constructor(options: Options) {
+        super()
+
         this.folders = options.folders
         this.extensions = options.extensions || []
         this.bytes = options.bytes || 1024 * 16
@@ -23,15 +33,20 @@ export class DuplicateFinder {
 
     public async run() {
         const files = await this.getFiles()
+
+        this.emit('files', files)
+
         const duplicates = await this.findDuplicates(files)
-        
+
         return duplicates
     }
 
     private async findDuplicates(files: string[]) {
         const grouped: { hash: string; files: string[] }[] = []
 
-        for (const file of files) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i]
+
             try {
                 const hash = await this.getFileHash(file)
                 const existingHash = grouped.find((h) => h.hash === hash)
@@ -41,6 +56,8 @@ export class DuplicateFinder {
                 } else {
                     grouped.push({ hash, files: [file] })
                 }
+
+                this.emit('progress', i + 1, files.length, file, hash)
             } catch (error) {
                 console.error(`Error hashing file: ${file}`, error)
             }
@@ -101,6 +118,8 @@ export class DuplicateFinder {
             absoluteFolder = path.resolve(process.cwd(), folder)
         }
 
+        this.emit('scan', absoluteFolder)
+
         const entries = await fs.promises.readdir(absoluteFolder, { withFileTypes: true })
 
         for (const entry of entries) {
@@ -117,6 +136,8 @@ export class DuplicateFinder {
                 files.push(fullPath.replace(/\\/g, '/'))
             }
         }
+        
+        this.emit('scan-result', absoluteFolder, files)
 
         return files
     }
