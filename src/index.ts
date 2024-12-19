@@ -45,9 +45,13 @@ async function handleKeep(action: string, files: string[], deleted: string[]) {
     const otherFiles = files.filter((f) => f !== file)
 
     for (const otherFile of otherFiles) {
-        deleted.push(otherFile)
+        try {
+            fs.unlinkSync(otherFile)
 
-        fs.unlinkSync(otherFile)
+            deleted.push(otherFile)
+        } catch (error: any) {
+            console.error(chalk.redBright(`Error deleting ${otherFile}: ${error.message}\n`))
+        }
     }
 
     console.log(chalk.greenBright(`Keeping ${file}\n`))
@@ -56,11 +60,15 @@ async function handleKeep(action: string, files: string[], deleted: string[]) {
 async function handleDelete(action: string, files: string[], deleted: string[]) {
     const file = action.replace('delete_', '')
 
-    deleted.push(file)
+    try {
+        fs.unlinkSync(file)
+        
+        deleted.push(file)
 
-    fs.unlinkSync(file)
-
-    console.log(chalk.redBright(`Deleted ${file}\n`))
+        console.log(chalk.redBright(`Deleted ${file}\n`))
+    } catch (error: any) {
+        console.error(chalk.redBright(`Error deleting ${file}: ${error.message}\n`))
+    }
 }
 
 function handleOpen(action: string) {
