@@ -28,8 +28,8 @@ function generateChoices(value: string, color: ChalkInstance, files: string[]) {
         open: 'Open',
     }
     const description: Record<string, string> = {
-        keep: 'Keep this file and delete the others',
-        delete: 'Delete this file',
+        keep: `Keep this file and delete the others ${chalk.yellowBright('(WARNING! Will be deleted permanently!)')}`,
+        delete: `Delete this file ${chalk.yellowBright('(WARNING! Will be deleted permanently!)')}`,
         open: 'Open this file (Windows only)',
     }
 
@@ -155,7 +155,7 @@ program
             if (!duplicate) break
 
             const action = await select({
-                message: `${currentDuplicateIndex + 1}/${duplicates.length} What do you want to do with these files?`,
+                message: `${currentDuplicateIndex + 1}/${duplicates.length} What do you want to do with these files? ${chalk.yellowBright('(WARNING! Delete operation will delete the file permanently!)')}`,
                 choices: [
                     { name: chalk.blueBright('Skip'), description: 'Skip this duplicates', value: 'skip' },
                     ...generateChoices('keep', chalk.greenBright, duplicate.files),
