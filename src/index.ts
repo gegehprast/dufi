@@ -2,6 +2,7 @@
 
 import { program } from 'commander'
 import scan from './scan.js'
+import purge from './purge.js'
 
 program.name('Dufi').description('Find and manage duplicate files').version('0.0.1')
 
@@ -12,6 +13,13 @@ program
     .description('scan folders for duplicate files')
     .action((folders, options) => {
         scan(folders, options)
+    })
+
+program
+    .command('purge')
+    .description('purge the cache file')
+    .action(() => {
+        purge()
     })
 
 program.parse()

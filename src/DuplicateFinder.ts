@@ -49,6 +49,10 @@ export class DuplicateFinder extends EventEmitter {
         return duplicates
     }
 
+    public static async purgeCache() {
+        fs.writeFileSync(CACHE_FILE, '')
+    }
+
     private async findDuplicates(files: string[]) {
         const grouped: { hash: string; files: string[] }[] = []
 
