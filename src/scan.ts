@@ -2,7 +2,7 @@ import DuplicateFinder from './DuplicateFinder.js'
 import chalk, { ChalkInstance } from 'chalk'
 import { select } from '@inquirer/prompts'
 import { exec } from 'child_process'
-import fs, { close } from 'fs'
+import fs from 'fs'
 
 function genId(index: number) {
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
