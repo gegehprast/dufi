@@ -7,14 +7,20 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Dufi CLI TS",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}\\src\\index.ts",
+            "args": ["scan", "${workspaceFolder}\\testfiles"],
+            "console": "integratedTerminal",
+            "runtimeArgs": ["--loader", "ts-node/esm"],
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Dufi CLI",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "program": "${workspaceFolder}\\build\\index.js",
-            "args": [
-                "scan", "${workspaceFolder}\\testfiles"
-            ],
+            "args": ["scan", "${workspaceFolder}\\testfiles"],
             "console": "integratedTerminal"
         }
     ]
