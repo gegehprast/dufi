@@ -2,6 +2,9 @@ import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
 import EventEmitter from 'events'
+import { fileURLToPath } from 'url'
+
+const CACHE_FILE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.cache')
 
 interface Options {
     folders: string[]
@@ -36,6 +39,11 @@ export class DuplicateFinder extends EventEmitter {
 
         this.emit('files', files)
 
+        // make sure cache file exists
+        if (!fs.existsSync(CACHE_FILE)) {
+            fs.writeFileSync(CACHE_FILE, '')
+        }
+
         const duplicates = await this.findDuplicates(files)
 
         return duplicates
@@ -67,13 +75,22 @@ export class DuplicateFinder extends EventEmitter {
     }
 
     private async getFileHash(file: string) {
+        // check if file hash is cached
+        const cache = fs.readFileSync(CACHE_FILE, 'utf8')
+        const cachedHash = cache.split('\n').find((line) => line.startsWith(`${file} `))
+
+        if (cachedHash) {
+            const split = cachedHash.split(' ')
+            return split[split.length - 1]
+        }
+
         const fileSize = fs.statSync(file).size
         const firstNHash = crypto.createHash('sha256')
         const lastNHash = crypto.createHash('sha256')
         const firstNStream = fs.createReadStream(file, { start: 0, end: this.bytes < fileSize ? this.bytes : fileSize })
         const lastNStream = fs.createReadStream(file, { start: fileSize - this.bytes > 0 ? fileSize - this.bytes : 0 })
 
-        return Promise.all([
+        const hash = await Promise.all([
             new Promise((resolve, reject) => {
                 firstNStream.on('data', (chunk) => {
                     firstNHash.update(chunk)
@@ -95,6 +112,11 @@ export class DuplicateFinder extends EventEmitter {
         ]).then(([first16KbHash, last16KbHash]) => {
             return `${first16KbHash}-${last16KbHash}`
         })
+
+        // cache file hash
+        fs.appendFileSync(CACHE_FILE, `${file} ${hash}\n`)
+
+        return hash
     }
 
     private async getFiles() {
@@ -136,7 +158,7 @@ export class DuplicateFinder extends EventEmitter {
                 files.push(fullPath.replace(/\\/g, '/'))
             }
         }
-        
+
         this.emit('scan-result', absoluteFolder, files)
 
         return files
