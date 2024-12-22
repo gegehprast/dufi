@@ -23,6 +23,7 @@ export class DuplicateFinder extends EventEmitter {
     private folders: string[]
     private extensions: string[]
     private bytes: number
+    private cachedHashes: { [key: string]: string } = {}
 
     public duplicates: string[] = []
 
@@ -42,6 +43,20 @@ export class DuplicateFinder extends EventEmitter {
         // make sure cache file exists
         if (!fs.existsSync(CACHE_FILE)) {
             fs.writeFileSync(CACHE_FILE, '')
+        }
+
+        // resurrect cached hashes
+        const cache = fs.readFileSync(CACHE_FILE, 'utf8')
+        const lines = cache.split('\n')
+
+        for (const line of lines) {
+            const split = line.split(' ')
+            const hash = split[split.length - 1]
+            const file = split.slice(0, split.length - 1).join(' ')
+
+            if (file && hash) {
+                this.cachedHashes[file] = hash
+            }
         }
 
         const duplicates = await this.findDuplicates(files)
@@ -80,12 +95,8 @@ export class DuplicateFinder extends EventEmitter {
 
     private async getFileHash(file: string) {
         // check if file hash is cached
-        const cache = fs.readFileSync(CACHE_FILE, 'utf8')
-        const cachedHash = cache.split('\n').find((line) => line.startsWith(`${file} `))
-
-        if (cachedHash) {
-            const split = cachedHash.split(' ')
-            return split[split.length - 1]
+        if (this.cachedHashes[file]) {
+            return this.cachedHashes[file]
         }
 
         const fileSize = fs.statSync(file).size
@@ -121,6 +132,7 @@ export class DuplicateFinder extends EventEmitter {
 
         // cache file hash
         fs.appendFileSync(CACHE_FILE, `${file} ${hash}\n`)
+        this.cachedHashes[file] = hash
 
         return hash
     }
