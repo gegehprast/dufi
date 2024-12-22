@@ -145,9 +145,8 @@ export default async function scan(folders: string[], options: { extensions: str
         if (!duplicate) break
 
         const action = await select({
-            message: `${currentDuplicateIndex + 1}/${duplicates.length} What do you want to do with these files? ${chalk.yellowBright(
-                '(WARNING! Delete operation will delete the file permanently!)'
-            )}`,
+            message: `${currentDuplicateIndex + 1}/${duplicates.length} ${chalk.blueBright(duplicate.hash)} 
+            \nWhat do you want to do with these files? ${chalk.yellowBright('(WARNING! Delete operation will delete the file permanently!)')}\n`,
             choices: [
                 { name: chalk.blueBright('Skip'), description: 'Skip this duplicates', value: 'skip' },
                 ...generateChoices('keep', chalk.greenBright, duplicate.files),
