@@ -100,6 +100,7 @@ export class DuplicateFinder extends EventEmitter {
                     firstNHash.update(chunk)
                 })
                 firstNStream.on('end', () => {
+                    firstNStream.close()
                     resolve(firstNHash.digest('hex'))
                 })
                 firstNStream.on('error', reject)
@@ -109,6 +110,7 @@ export class DuplicateFinder extends EventEmitter {
                     lastNHash.update(chunk)
                 })
                 lastNStream.on('end', () => {
+                    lastNStream.close()
                     resolve(lastNHash.digest('hex'))
                 })
                 lastNStream.on('error', reject)
