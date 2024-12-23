@@ -4,6 +4,7 @@ import { select } from '@inquirer/prompts'
 import { exec } from 'child_process'
 import fs from 'fs'
 import server from './server.js'
+import DuplicateManager from './DuplicateManager.js'
 
 function genId(index: number) {
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -164,7 +165,9 @@ export default async function scan(folders: string[], options: { web: boolean, e
         // start web server
         console.log(chalk.blueBright('Starting web server...'))
 
-        await server()
+        const manager = new DuplicateManager(duplicates)
+
+        await server(manager)
         
         openBrowser()
 

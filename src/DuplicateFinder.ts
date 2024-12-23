@@ -6,7 +6,9 @@ import { fileURLToPath } from 'url'
 
 const CACHE_FILE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.cache')
 
-interface Options {
+export type Duplicate = { hash: string; files: string[] }
+
+export interface Options {
     folders: string[]
     extensions?: string[]
     bytes?: number
@@ -24,8 +26,6 @@ export class DuplicateFinder extends EventEmitter {
     private extensions: string[]
     private bytes: number
     private cachedHashes: { [key: string]: string } = {}
-
-    public duplicates: string[] = []
 
     constructor(options: Options) {
         super()
@@ -69,7 +69,7 @@ export class DuplicateFinder extends EventEmitter {
     }
 
     private async findDuplicates(files: string[]) {
-        const grouped: { hash: string; files: string[] }[] = []
+        const grouped: Duplicate[] = []
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i]
