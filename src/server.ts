@@ -17,11 +17,13 @@ export default async function server(manager: DuplicateManager) {
     
     if (process.env.NODE_ENV === 'development') {
         const viteDevServer = await createServer({
-            configFile: 'src/web/vite.config.ts',
+            // @see https://github.com/vitejs/vite/discussions/12305#discussioncomment-5217387
+            configFile: path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'web/vite.config.js'),
             server: {
                 middlewareMode: true,
             },
-            root: 'src/web',
+            // @see https://github.com/vitejs/vite/discussions/12305#discussioncomment-5217387
+            root: path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'web'),
             base: '/',
         })
         app.use(viteDevServer.middlewares)
