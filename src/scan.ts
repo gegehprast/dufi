@@ -122,7 +122,16 @@ function openBrowser() {
     const isLinux = process.platform === 'linux'
 
     if (isWindows) {
-        exec('start http://localhost:1234')
+        // try open Edge first
+        exec('start microsoft-edge:http://localhost:1234', (error) => {
+            if (!error) return
+
+            exec('start http://localhost:1234', (error) => {
+                if (!error) return
+
+                console.error(chalk.redBright('Error opening browser! Please open http://localhost:1234 manually.'))
+            })
+        })
     } else if (isMac) {
         exec('open http://localhost:1234')
     } else if (isLinux) {
