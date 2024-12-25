@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc --build",
+    "postbuild": "cd src/web && pnpm build --emptyOutDir",
     "clean": "tsc --build --clean",
     "dev": "tsc -w"
   },
