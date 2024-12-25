@@ -32,7 +32,6 @@ export default async function server(manager: DuplicateManager) {
     }
 
     io.on('connection', (socket) => {
-        console.log('a user connected')
         socket.emit('duplicates', manager.duplicates)
     })
 
