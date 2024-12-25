@@ -5,6 +5,8 @@ import duplicatesReducer, { DuplicateWithPreview } from './duplicatesReducer'
 function App() {
     const [isConnected, setIsConnected] = useState(socket.connected)
     const [duplicates, dispatchDuplicates] = useReducer(duplicatesReducer, [])
+    const [showAlert, setShowAlert] = useState(false)
+    const [alert, setAlert] = useState('')
 
     useEffect(() => {
         function onConnect() {
@@ -61,7 +63,9 @@ function App() {
 
             {duplicates.map((duplicate, index) => (
                 <div key={index} className="pb-2 mt-2 border-b hover:bg-slate-50">
-                    <h2 className="text-xs font-semibold">[{index + 1}] {duplicate.hash}</h2>
+                    <h2 className="text-xs font-semibold">
+                        [{index + 1}] {duplicate.hash}
+                    </h2>
 
                     <div className="flex flex-row items-center gap-4 overflow-x-auto">
                         {duplicate.files.map((file, index) => (
@@ -74,27 +78,31 @@ function App() {
                                         className={`object-cover h-56 ${file.deleted ? 'grayscale' : ''}`}
                                     />
                                 ) : (
-                                    <button
-                                        onClick={() => {
-                                            window.open(file.file, '_blank')
-                                        }}
-                                        rel="noreferrer"
-                                        className={`p-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 ${
-                                            file.deleted ? 'grayscale' : ''
-                                        }`}
-                                        disabled={file.deleted}
-                                    >
-                                        Load Preview
-                                    </button>
+                                    <div className="w-56 h-56 text-center bg-gray-200">
+                                        <p>Preview not available.</p>
+                                        <p>Open original file below.</p>
+                                    </div>
                                 )}
 
-                                <div className="w-full">
+                                <div className="flex flex-row items-center w-full gap-1">
                                     <input
                                         type="text"
                                         value={file.file}
                                         readOnly
-                                        className="w-full p-2 text-xs bg-gray-100 rounded-lg"
+                                        className="w-full h-6 p-1 text-xs bg-gray-100 rounded-lg"
                                     />
+                                    {/* copy buton */}
+                                    <button
+                                        onClick={async () => {
+                                            await navigator.clipboard.writeText(file.file)
+
+                                            setAlert('Copied to clipboard')
+                                            setShowAlert(true)
+                                        }}
+                                        className="w-10 h-6 p-1 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                                    >
+                                        Copy
+                                    </button>
                                 </div>
 
                                 <div className="flex flex-row items-center justify-center gap-2">
@@ -102,7 +110,7 @@ function App() {
                                         onClick={() => {
                                             socket.emit('keep', file.id)
                                         }}
-                                        className="w-16 h-6 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                                        className="w-16 h-6 text-xs text-white bg-green-500 rounded-lg hover:bg-green-600"
                                     >
                                         <span>Keep</span>
                                     </button>
@@ -121,6 +129,24 @@ function App() {
                     </div>
                 </div>
             ))}
+
+            {/* alert */}
+            <div
+                className={`transition-all duration-300 fixed -translate-x-1/2 top-4 left-1/2 ${
+                    showAlert ? 'opacity-100 translate-y-0' : 'opacity-0 pointer-events-none -translate-y-[20px]'
+                } `}
+                onTransitionEnd={() => {
+                    if (!showAlert) return
+
+                    setTimeout(() => {
+                        setShowAlert(false)
+                    }, 1000)
+                }}
+            >
+                <div className="flex flex-row items-center gap-2 p-2 text-white bg-green-500 rounded-lg">
+                    <span>{alert}</span>
+                </div>
+            </div>
         </div>
     )
 }
