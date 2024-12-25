@@ -68,7 +68,7 @@ function App() {
                             <div key={index} className="flex flex-col items-center gap-2 p-2 border w-96">
                                 {file.preview ? (
                                     <img
-                                        src={`previews/${file.preview}`}
+                                        src={file.preview}
                                         alt={file.file}
                                         title={file.file}
                                         className={`object-cover h-56 ${file.deleted ? 'grayscale' : ''}`}

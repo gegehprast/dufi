@@ -1,10 +1,9 @@
 import EventEmitter from 'events'
 import { Duplicate } from './DuplicateFinder.js'
 import fs from 'fs'
-import path from 'path'
 import Database from 'better-sqlite3'
 import sharp from 'sharp'
-import { DB_FILE, PREVIEW_DIR } from './const.js'
+import { DB_FILE } from './const.js'
 
 const db = new Database(DB_FILE)
 db.pragma('journal_mode = WAL')
@@ -45,10 +44,6 @@ export class DuplicateManager extends EventEmitter {
     }
 
     public async init(duplicates: Duplicate[]) {
-        // clear and make sure preview directory exists
-        if (fs.existsSync(PREVIEW_DIR)) fs.rmdirSync(PREVIEW_DIR, { recursive: true })
-        fs.mkdirSync(PREVIEW_DIR, { recursive: true })
-
         // drop table if exists
         db.prepare('DROP TABLE IF EXISTS duplicates').run()
 
@@ -130,16 +125,9 @@ export class DuplicateManager extends EventEmitter {
             const data = fs.readFileSync(file)
 
             try {
-                // replace : and separators with _
-                const filename = file.replace(/[:/\\]/g, '_')
-                const removedExt = filename.split('.').slice(0, -1).join('.')
-                const previewFilename = `${removedExt}_preview.jpg`
+                const buffer = await sharp(data).resize(180).toBuffer()
 
-                console.log(`previewFilename ${previewFilename}`)
-
-                await sharp(data).resize(360).toFile(path.resolve(PREVIEW_DIR, previewFilename))
-
-                return previewFilename
+                return `data:image/png;base64,${buffer.toString('base64')}`
             } catch (error) {
                 // ignore errors
             }
