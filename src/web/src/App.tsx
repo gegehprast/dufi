@@ -84,25 +84,19 @@ function App() {
                                     </div>
                                 )}
 
-                                <div className="flex flex-row items-center w-full gap-1">
+                                <div className="w-full">
                                     <input
                                         type="text"
                                         value={file.file}
                                         readOnly
-                                        className="w-full h-6 p-1 text-xs bg-gray-100 rounded-lg"
-                                    />
-                                    {/* copy buton */}
-                                    <button
+                                        className="w-full h-6 p-1 text-xs bg-gray-100 rounded-lg cursor-pointer"
                                         onClick={async () => {
                                             await navigator.clipboard.writeText(file.file)
 
                                             setAlert('Copied to clipboard')
                                             setShowAlert(true)
                                         }}
-                                        className="w-10 h-6 p-1 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-                                    >
-                                        Copy
-                                    </button>
+                                    />
                                 </div>
 
                                 <div className="flex flex-row items-center justify-center gap-2">
