@@ -56,12 +56,12 @@ function App() {
     return (
         <div className="p-4">
             <h1 className="text-xl font-bold">
-                Dufi - Duplicates Manager ({isConnected ? 'Connected' : 'Disconnected'})
+                Dufi - Duplicates Manager ({isConnected ? 'Connected' : 'Connecting...'})
             </h1>
 
             {duplicates.map((duplicate, index) => (
-                <div key={index} className="pb-2 mt-4 border-b hover:bg-slate-50">
-                    <h2 className="font-semibold">{duplicate.hash}</h2>
+                <div key={index} className="pb-2 mt-2 border-b hover:bg-slate-50">
+                    <h2 className="text-xs font-semibold">[{index + 1}] {duplicate.hash}</h2>
 
                     <div className="flex flex-row items-center gap-4 overflow-x-auto">
                         {duplicate.files.map((file, index) => (
@@ -93,7 +93,7 @@ function App() {
                                         type="text"
                                         value={file.file}
                                         readOnly
-                                        className="w-full p-2 bg-gray-100 rounded-lg"
+                                        className="w-full p-2 text-xs bg-gray-100 rounded-lg"
                                     />
                                 </div>
 
@@ -102,18 +102,18 @@ function App() {
                                         onClick={() => {
                                             socket.emit('keep', file.id)
                                         }}
-                                        className="w-20 p-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                                        className="w-16 h-6 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600"
                                     >
-                                        Keep
+                                        <span>Keep</span>
                                     </button>
 
                                     <button
                                         onClick={() => {
                                             socket.emit('delete', file.id)
                                         }}
-                                        className="w-20 p-1 text-white bg-red-500 rounded-lg hover:bg-red-600"
+                                        className="w-16 h-6 text-xs text-white bg-red-500 rounded-lg hover:bg-red-600"
                                     >
-                                        Delete
+                                        <span>Delete</span>
                                     </button>
                                 </div>
                             </div>
