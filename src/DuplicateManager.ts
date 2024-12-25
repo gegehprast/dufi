@@ -5,9 +5,6 @@ import Database from 'better-sqlite3'
 import sharp from 'sharp'
 import { DB_FILE } from './const.js'
 
-const db = new Database(DB_FILE)
-db.pragma('journal_mode = WAL')
-
 const IMAGE_EXTENSIONS = [
     '.apng',
     '.png',
@@ -39,26 +36,30 @@ export type GroupedDuplicate = {
 export interface DuplicateManager {}
 
 export class DuplicateManager extends EventEmitter {
+    private db = new Database(DB_FILE)
+
     constructor() {
         super()
+        
+        this.db.pragma('journal_mode = WAL')
     }
 
     public async init(duplicates: Duplicate[]) {
         // drop table if exists
-        db.prepare('DROP TABLE IF EXISTS duplicates').run()
+        this.db.prepare('DROP TABLE IF EXISTS duplicates').run()
 
         // create table
-        db.prepare(
+        this.db.prepare(
             'CREATE TABLE duplicates (id INTEGER PRIMARY KEY, hash TEXT, file TEXT, preview TEXT, deleted INTEGER)'
         ).run()
 
         // create unique index of hash and file
-        db.prepare('CREATE UNIQUE INDEX hash_file ON duplicates (hash, file)').run()
+        this.db.prepare('CREATE UNIQUE INDEX hash_file ON duplicates (hash, file)').run()
 
-        const insert = db.prepare(
+        const insert = this.db.prepare(
             'INSERT INTO duplicates (hash, file, preview, deleted) VALUES (@hash, @file, @preview, @deleted)'
         )
-        const insertMany = db.transaction((duplicates) => {
+        const insertMany = this.db.transaction((duplicates) => {
             for (const duplicate of duplicates) insert.run(duplicate)
         })
 
@@ -80,7 +81,7 @@ export class DuplicateManager extends EventEmitter {
 
     public async get() {
         return new Promise<GroupedDuplicate[]>((resolve, reject) => {
-            const rows = db.prepare('SELECT * FROM duplicates').all() as DuplicateModel[]
+            const rows = this.db.prepare('SELECT * FROM duplicates').all() as DuplicateModel[]
 
             const duplicates: GroupedDuplicate[] = []
 
@@ -114,7 +115,7 @@ export class DuplicateManager extends EventEmitter {
     }
 
     public async delete(id: number) {
-        db.prepare('UPDATE duplicates SET deleted = 1 WHERE id = ?').run(id)
+        this.db.prepare('UPDATE duplicates SET deleted = 1 WHERE id = ?').run(id)
     }
 
     private async generatePreview(file: string) {
