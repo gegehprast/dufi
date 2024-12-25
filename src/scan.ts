@@ -139,7 +139,7 @@ function openBrowser() {
         exec('xdg-open http://localhost:1234')
     }
 
-    console.log(chalk.blueBright('Opening browser...'))
+    console.log(chalk.blueBright('Opening http://localhost:1234 in your browser...'))
 }
 
 export default async function scan(folders: string[], options: { web: boolean, extensions: string[]; bytes: string }) {

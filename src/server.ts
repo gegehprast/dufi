@@ -38,7 +38,6 @@ export default async function server(manager: DuplicateManager) {
 
     return new Promise<void>((resolve) => {
         server.listen(1234, () => {
-            console.log('Server is running on port 1234')
             resolve()
         })
     })
