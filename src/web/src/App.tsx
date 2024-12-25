@@ -108,6 +108,15 @@ function App() {
                                 <div className="flex flex-row items-center justify-center gap-2">
                                     <button
                                         onClick={() => {
+                                            socket.emit('open', file.id)
+                                        }}
+                                        className="w-16 h-6 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                                    >
+                                        <span>Open</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
                                             socket.emit('keep', file.id)
                                         }}
                                         className="w-16 h-6 text-xs text-white bg-green-500 rounded-lg hover:bg-green-600"

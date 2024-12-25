@@ -45,6 +45,10 @@ export default async function server(manager: DuplicateManager) {
 
             io.emit('deleted', id)
         })
+
+        socket.on('open', (id: number) => {
+            manager.open(id)
+        })
     })
 
     return new Promise<void>((resolve) => {

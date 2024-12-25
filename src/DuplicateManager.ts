@@ -4,6 +4,7 @@ import fs from 'fs'
 import Database from 'better-sqlite3'
 import sharp from 'sharp'
 import { DB_FILE } from './const.js'
+import { exec } from 'child_process'
 
 const IMAGE_EXTENSIONS = [
     '.apng',
@@ -116,6 +117,20 @@ export class DuplicateManager extends EventEmitter {
 
     public async delete(id: number) {
         this.db.prepare('UPDATE duplicates SET deleted = 1 WHERE id = ?').run(id)
+    }
+
+    public async open(id: number) {
+        const file = this.db.prepare('SELECT file FROM duplicates WHERE id = ?').get(id) as DuplicateModel
+
+        if (file) {
+            const isWindows = process.platform === 'win32'
+
+            if (isWindows) {
+                exec(`start "" "${file.file}"`)
+            }
+
+            return
+        }
     }
 
     private async generatePreview(file: string) {
