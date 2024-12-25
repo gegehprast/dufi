@@ -165,7 +165,8 @@ export default async function scan(folders: string[], options: { web: boolean, e
         // start web server
         console.log(chalk.blueBright('Starting web server...'))
 
-        const manager = new DuplicateManager(duplicates)
+        const manager = new DuplicateManager()
+        await manager.init(duplicates)
 
         await server(manager)
         

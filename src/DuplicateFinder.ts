@@ -2,9 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
 import EventEmitter from 'events'
-import { fileURLToPath } from 'url'
-
-const CACHE_FILE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.cache')
+import { CACHE_FILE } from './const.js'
 
 export type Duplicate = { hash: string; files: string[] }
 

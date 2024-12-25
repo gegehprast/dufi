@@ -31,8 +31,20 @@ export default async function server(manager: DuplicateManager) {
         app.use(express.static(path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'web')))
     }
 
-    io.on('connection', (socket) => {
-        socket.emit('duplicates', manager.duplicates)
+    io.on('connection', async (socket) => {
+        function emitDuplicates() {
+            manager.get().then((duplicates) => {
+                socket.emit('duplicates', duplicates)
+            })
+        }
+
+        emitDuplicates()
+
+        socket.on('delete', (id: number) => {
+            manager.delete(id)
+
+            io.emit('deleted', id)
+        })
     })
 
     return new Promise<void>((resolve) => {
