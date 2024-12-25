@@ -58,7 +58,7 @@ function App() {
     return (
         <div className="p-4">
             <h1 className="text-xl font-bold">
-                Dufi - Duplicates Manager ({isConnected ? 'Connected' : 'Connecting...'})
+                Dufi - Duplicates Manager ({isConnected ? `${duplicates.length} duplicates` : 'Connecting...'})
             </h1>
 
             {duplicates.map((duplicate, index) => (
