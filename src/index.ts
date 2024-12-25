@@ -3,6 +3,7 @@
 import { program } from 'commander'
 import scan from './scan.js'
 import purge from './purge.js'
+import chalk from 'chalk'
 
 program.name('Dufi').description('Find and manage duplicate files').version('0.0.1')
 
@@ -32,4 +33,21 @@ process.on('uncaughtException', (error) => {
         // Rethrow unknown errors
         throw error
     }
+})
+
+process.on('SIGINT', () => {
+    process.exit(0)
+})
+
+process.on('SIGQUIT', () => {
+    process.exit(0)
+})
+
+process.on('SIGTERM', () => {
+    process.exit(0)
+})
+
+process.on('exit', () => {
+    console.log(chalk.green('\nGoodbye!'))
+    process.exit(0)
 })
