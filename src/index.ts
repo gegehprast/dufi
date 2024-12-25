@@ -30,8 +30,12 @@ process.on('uncaughtException', (error) => {
     if (error instanceof Error && error.name === 'ExitPromptError') {
         console.log('Cancelled by user. Press enter to exit...')
     } else {
-        // Rethrow unknown errors
-        throw error
+        if (process.env.NODE_ENV === 'development') {
+            throw error
+        } else {
+            console.error(chalk.redBright(`\n${error.message}`))
+            process.exit(1)
+        }
     }
 })
 
