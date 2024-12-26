@@ -1,5 +1,11 @@
 # dufi
 
+## 0.0.3
+
+### Patch Changes
+
+-   5c51bc8: return early when no duplicates are found when using -w option
+
 ## 0.0.2
 
 ### Patch Changes
