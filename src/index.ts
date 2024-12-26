@@ -4,17 +4,32 @@ import { program } from 'commander'
 import scan from './scan.js'
 import purge from './purge.js'
 import chalk from 'chalk'
+import pkg from '../package.json' assert { type: 'json' }
 
-program.name('Dufi').description('Find and manage duplicate files').version('0.0.1')
+program
+    .name('dufi')
+    .description('Find and manage duplicate files')
+    .version(pkg.version)
+    .usage('<command> [options]')
 
 program
     .command('scan <folders...>')
-    .option('-w, --web', 'start web server to manage duplicates', false)
+    .option('-w, --web', 'start the web UI to manage the duplicates (alias for scan-web)', false)
     .option('-e, --extensions [extensions...]', 'filter files by extension', [])
     .option('-b, --bytes [bytes]', 'number of first and last bytes to compare', `${16 * 1024}`)
     .description('scan folders for duplicate files')
+    .addHelpText('after', '\nExample:\n  dufi scan .\n  dufi scan FolderA FolderB\n')
     .action((folders, options) => {
         scan(folders, options)
+    })
+
+program
+    .command('scan-web <folders...>')
+    .option('-e, --extensions [extensions...]', 'filter files by extension', [])
+    .option('-b, --bytes [bytes]', 'number of first and last bytes to compare', `${16 * 1024}`)
+    .description('scan and start the web UI to manage the duplicates (alias for scan -w)')
+    .action((folders, options) => {
+        scan(folders, { ...options, web: true })
     })
 
 program
