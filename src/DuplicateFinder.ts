@@ -69,9 +69,7 @@ export class DuplicateFinder extends EventEmitter {
     private async findDuplicates(files: string[]) {
         const grouped: Duplicate[] = []
 
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i]
-
+        for (const [i, file] of files.entries()) {
             try {
                 const hash = await this.getFileHash(file)
                 const existingHash = grouped.find((h) => h.hash === hash)
