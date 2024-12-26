@@ -117,7 +117,18 @@ export class DuplicateManager extends EventEmitter {
         })
     }
 
-    public async delete(id: number) {
+    public keep(id: number) {
+        const duplicate = this.db.prepare('SELECT hash, file FROM duplicates WHERE id = ?').get(id) as Pick<DuplicateModel, 'hash' | 'file'>
+        const others = this.db.prepare('SELECT id FROM duplicates WHERE hash = ? AND id != ?').all(duplicate.hash, id) as Pick<DuplicateModel, 'id'>[]
+
+        for (const other of others) {
+            this.delete(other.id)
+        }
+
+        return others.map((o) => o.id)
+    }
+
+    public delete(id: number) {
         const duplicate = this.db.prepare('SELECT file FROM duplicates WHERE id = ?').get(id) as DuplicateModel
 
         if (duplicate) {

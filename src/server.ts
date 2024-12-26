@@ -40,6 +40,14 @@ export default async function server(manager: DuplicateManager) {
 
         emitDuplicates()
 
+        socket.on('keep', (id: number) => {
+            const deleted = manager.keep(id)
+            
+            for (const id of deleted) {
+                io.emit('deleted', id)
+            }
+        })
+
         socket.on('delete', (id: number) => {
             manager.delete(id)
 
