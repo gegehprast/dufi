@@ -5,16 +5,34 @@
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "type": "module",
+  "files": [
+    "build/",
+    "LICENSE",
+    "README.md"
+  ],
+  "description": "Find and manage duplicate files",
+  "keywords": [
+    "nodejs",
+    "windows",
+    "cli",
+    "photos",
+    "deduplication"
+  ],
+  "author": "Gegeh Prast",
+  "homepage": "https://github.com/gegehprast/dufi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gegehprast/dufi.git"
+  },
+  "license": "MIT",
   "scripts": {
     "lint": "tsc",
     "build": "tsup src/index.ts --dts-resolve --format esm --out-dir build",
     "postbuild": "cd src/web && pnpm build --emptyOutDir",
     "clean": "tsc --build --clean",
-    "dev": "tsc -w"
+    "dev": "tsc -w",
+    "release": "pnpm build && changeset publish"
   },
-  "author": "Gegeh Prast",
-  "license": "MIT",
-  "description": "Find and manage duplicate files",
   "devDependencies": {
     "@changesets/cli": "^2.27.11",
     "@types/better-sqlite3": "^7.6.12",
