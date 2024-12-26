@@ -60,6 +60,9 @@ dufi scan .
 # Scan multiple directories
 dufi scan /path/to/directory1 /path/to/directory2/sub
 
+# Scan and manage on Web UI
+dufi scan /path/to/directory1 /path/to/directory2/sub --web
+
 # Purge cached hash
 dufi purge
 ```
