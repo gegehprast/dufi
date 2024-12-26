@@ -41,7 +41,7 @@ export class DuplicateManager extends EventEmitter {
 
     constructor() {
         super()
-        
+
         this.db.pragma('journal_mode = WAL')
     }
 
@@ -50,9 +50,11 @@ export class DuplicateManager extends EventEmitter {
         this.db.prepare('DROP TABLE IF EXISTS duplicates').run()
 
         // create table
-        this.db.prepare(
-            'CREATE TABLE duplicates (id INTEGER PRIMARY KEY, hash TEXT, file TEXT, preview TEXT, deleted INTEGER)'
-        ).run()
+        this.db
+            .prepare(
+                'CREATE TABLE duplicates (id INTEGER PRIMARY KEY, hash TEXT, file TEXT, preview TEXT, deleted INTEGER)'
+            )
+            .run()
 
         // create unique index of hash and file
         this.db.prepare('CREATE UNIQUE INDEX hash_file ON duplicates (hash, file)').run()
@@ -116,6 +118,12 @@ export class DuplicateManager extends EventEmitter {
     }
 
     public async delete(id: number) {
+        const duplicate = this.db.prepare('SELECT file FROM duplicates WHERE id = ?').get(id) as DuplicateModel
+
+        if (duplicate) {
+            fs.unlinkSync(duplicate.file)
+        }
+
         this.db.prepare('UPDATE duplicates SET deleted = 1 WHERE id = ?').run(id)
     }
 
