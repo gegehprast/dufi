@@ -162,6 +162,8 @@ export default async function scan(folders: string[], options: { web: boolean, e
     console.log(chalk.greenBright.bold(`\nFound ${duplicates.length} duplicates in ${((endTime - startTime) / 1000).toFixed(2)}s\n`))
 
     if (options.web) {
+        if (duplicates.length === 0) return
+
         // start web server
         console.log(chalk.blueBright('Starting web server...'))
 
