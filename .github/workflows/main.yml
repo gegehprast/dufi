@@ -15,5 +15,6 @@ jobs:
           node-version: 18
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
+      - run: cd src/web && pnpm install --frozen-lockfile
       - run: pnpm run lint && pnpm run build
       
