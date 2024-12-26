@@ -78,9 +78,19 @@ function App() {
                                         className={`object-cover h-56 ${file.deleted ? 'grayscale' : ''}`}
                                     />
                                 ) : (
-                                    <div className="w-56 h-56 text-center bg-gray-200">
-                                        <p>Preview not available.</p>
-                                        <p>Open original file below.</p>
+                                    <div
+                                        className={`flex items-center justify-center w-56 h-56 text-center bg-blue-100 ${
+                                            file.deleted ? 'grayscale' : ''
+                                        }`}
+                                    >
+                                        {file.deleted ? (
+                                            <p>File deleted.</p>
+                                        ) : (
+                                            <div className="text-blue-600">
+                                                <p>Preview not available.</p>
+                                                <p>Open original file below.</p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
@@ -99,7 +109,7 @@ function App() {
                                     />
                                 </div>
 
-                                <div className="flex flex-row items-center justify-center gap-2">
+                                <div className={`flex flex-row items-center justify-center gap-2 ${file.deleted ? 'invisible' : ''}`}>
                                     <button
                                         onClick={() => {
                                             socket.emit('open', file.id)
