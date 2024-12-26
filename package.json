@@ -30,7 +30,7 @@
     "build": "tsup src/index.ts --dts-resolve --format esm --out-dir build",
     "postbuild": "cd src/web && pnpm build --emptyOutDir",
     "clean": "tsc --build --clean",
-    "dev": "tsc -w",
+    "watch": "tsup src/index.ts --dts-resolve --format esm --out-dir build --watch",
     "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
