@@ -2,11 +2,11 @@ import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
 import EventEmitter from 'events'
-import { fileURLToPath } from 'url'
+import { CACHE_FILE } from './const.js'
 
-const CACHE_FILE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.cache')
+export type Duplicate = { hash: string; files: string[] }
 
-interface Options {
+export interface Options {
     folders: string[]
     extensions?: string[]
     bytes?: number
@@ -24,8 +24,6 @@ export class DuplicateFinder extends EventEmitter {
     private extensions: string[]
     private bytes: number
     private cachedHashes: { [key: string]: string } = {}
-
-    public duplicates: string[] = []
 
     constructor(options: Options) {
         super()
@@ -69,11 +67,9 @@ export class DuplicateFinder extends EventEmitter {
     }
 
     private async findDuplicates(files: string[]) {
-        const grouped: { hash: string; files: string[] }[] = []
+        const grouped: Duplicate[] = []
 
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i]
-
+        for (const [i, file] of files.entries()) {
             try {
                 const hash = await this.getFileHash(file)
                 const existingHash = grouped.find((h) => h.hash === hash)

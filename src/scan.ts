@@ -3,6 +3,8 @@ import chalk, { ChalkInstance } from 'chalk'
 import { select } from '@inquirer/prompts'
 import { exec } from 'child_process'
 import fs from 'fs'
+import server from './server.js'
+import DuplicateManager from './DuplicateManager.js'
 
 function genId(index: number) {
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -115,7 +117,32 @@ function handleProgress(iteration: number, total: number, file: string, hash: st
     process.stdout.write(chalk.whiteBright(`[${iteration}/${total}] ${file} (${hash.slice(0, 8)}...)`))
 }
 
-export default async function scan(folders: string[], options: { extensions: string[]; bytes: string }) {
+function openBrowser() {
+    const isWindows = process.platform === 'win32'
+    const isMac = process.platform === 'darwin'
+    const isLinux = process.platform === 'linux'
+
+    if (isWindows) {
+        // try open Edge first
+        exec('start microsoft-edge:http://localhost:1234', (error) => {
+            if (!error) return
+
+            exec('start http://localhost:1234', (error) => {
+                if (!error) return
+
+                console.error(chalk.redBright('Error opening browser! Please open http://localhost:1234 manually.'))
+            })
+        })
+    } else if (isMac) {
+        exec('open http://localhost:1234')
+    } else if (isLinux) {
+        exec('xdg-open http://localhost:1234')
+    }
+
+    console.log(chalk.blueBright('Opening http://localhost:1234 in your browser...'))
+}
+
+export default async function scan(folders: string[], options: { web: boolean, extensions: string[]; bytes: string }) {
     // scan files
     const startTime = Date.now()
     const finder = new DuplicateFinder({
@@ -133,6 +160,20 @@ export default async function scan(folders: string[], options: { extensions: str
     const endTime = Date.now()
 
     console.log(chalk.greenBright.bold(`\nFound ${duplicates.length} duplicates in ${((endTime - startTime) / 1000).toFixed(2)}s\n`))
+
+    if (options.web) {
+        // start web server
+        console.log(chalk.blueBright('Starting web server...'))
+
+        const manager = new DuplicateManager()
+        await manager.init(duplicates)
+
+        await server(manager)
+        
+        openBrowser()
+
+        return
+    }
 
     // start interactive management
     let currentDuplicateIndex = 0
