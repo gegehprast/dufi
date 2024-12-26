@@ -3,9 +3,11 @@
   "bin": "./build/index.js",
   "version": "0.0.1",
   "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc --build",
+    "lint": "tsc",
+    "build": "tsup src/index.ts --dts-resolve --format esm --out-dir build",
     "postbuild": "cd src/web && pnpm build --emptyOutDir",
     "clean": "tsc --build --clean",
     "dev": "tsc -w"
@@ -14,11 +16,12 @@
   "license": "MIT",
   "description": "Find and manage duplicate files",
   "devDependencies": {
+    "@changesets/cli": "^2.27.11",
     "@types/better-sqlite3": "^7.6.12",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
-    "cross-env": "^7.0.3",
     "ts-node": "^10.9.2",
+    "tsup": "^8.3.5",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
@@ -30,7 +33,7 @@
     "express": "^4.21.2",
     "sharp": "^0.33.5",
     "socket.io": "^4.8.1",
-    "vite": "^6.0.5"
+    "vite": "^6.0.6"
   },
   "packageManager": "pnpm@9.15.1+sha512.1acb565e6193efbebda772702950469150cf12bcc764262e7587e71d19dc98a423dff9536e57ea44c49bdf790ff694e83c27be5faa23d67e0c033b583be4bfcf"
 }
