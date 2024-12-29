@@ -66,31 +66,52 @@ function App() {
                 e.stopPropagation()
 
                 switch (e.code) {
-                    case 'ArrowDown':
-                        setSelectedDupIndex((prev) => (prev + 1) % duplicates.length)
+                    case 'ArrowDown': {
+                        const nextDupIndex = (selectedDupIndex + 1) % duplicates.length
+
+                        setSelectedDupIndex(nextDupIndex)
+
+                        // check if the selected file index is out of bounds
+                        if (selectedFileIndex >= duplicates[nextDupIndex].files.length) {
+                            setSelectedFileIndex(duplicates[nextDupIndex].files.length - 1)
+                        }
                         break
-                    case 'ArrowUp':
-                        setSelectedDupIndex((prev) => (prev - 1 + duplicates.length) % duplicates.length)
+                    }
+                    case 'ArrowUp': {
+                        const prevDupIndex = (selectedDupIndex - 1 + duplicates.length) % duplicates.length
+
+                        setSelectedDupIndex(prevDupIndex)
+
+                        // check if the selected file index is out of bounds
+                        if (selectedFileIndex >= duplicates[prevDupIndex].files.length) {
+                            setSelectedFileIndex(duplicates[prevDupIndex].files.length - 1)
+                        }
                         break
-                    case 'ArrowRight':
+                    }
+                    case 'ArrowRight': {
                         setSelectedFileIndex((prev) => (prev + 1) % duplicates[selectedDupIndex].files.length)
                         break
-                    case 'ArrowLeft':
+                    }
+                    case 'ArrowLeft': {
                         setSelectedFileIndex(
                             (prev) =>
                                 (prev - 1 + duplicates[selectedDupIndex].files.length) %
                                 duplicates[selectedDupIndex].files.length
                         )
                         break
-                    case 'KeyA':
+                    }
+                    case 'KeyA': {
                         socket.emit('open', duplicates[selectedDupIndex].files[selectedFileIndex].id)
                         break
-                    case 'KeyS':
+                    }
+                    case 'KeyS': {
                         socket.emit('keep', duplicates[selectedDupIndex].files[selectedFileIndex].id)
                         break
-                    case 'KeyD':
+                    }
+                    case 'KeyD': {
                         socket.emit('delete', duplicates[selectedDupIndex].files[selectedFileIndex].id)
                         break
+                    }
                 }
             }
         }
