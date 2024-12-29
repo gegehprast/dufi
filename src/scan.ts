@@ -168,6 +168,19 @@ export default async function scan(folders: string[], options: { web: boolean, e
         console.log(chalk.blueBright('Starting web server...'))
 
         const manager = new DuplicateManager()
+        let previewStartTime: number
+        let previewEndTime: number
+
+        manager.on('preview-start', () => {
+            previewStartTime = Date.now()
+            console.log(chalk.blueBright('Starting preview generation...'))
+        })
+
+        manager.on('preview-end', () => {
+            previewEndTime = Date.now()
+            console.log(chalk.blueBright(`Preview generation completed in ${((previewEndTime - previewStartTime) / 1000).toFixed(2)}s`))
+        })
+
         await manager.init(duplicates)
 
         await server(manager)

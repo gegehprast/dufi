@@ -34,7 +34,12 @@ export type GroupedDuplicate = {
     files: (Omit<DuplicateModel, 'hash' | 'deleted'> & { deleted: boolean })[]
 }
 
-export interface DuplicateManager {}
+export interface DuplicateManager {
+    on(event: 'db-trans-start', listener: () => void): this
+    on(event: 'db-trans-end', listener: () => void): this
+    on(event: 'preview-start', listener: () => void): this
+    on(event: 'preview-end', listener: () => void): this
+}
 
 export class DuplicateManager extends EventEmitter {
     private db = new Database(DB_FILE)
@@ -59,11 +64,15 @@ export class DuplicateManager extends EventEmitter {
         // create unique index of hash and file
         this.db.prepare('CREATE UNIQUE INDEX hash_file ON duplicates (hash, file)').run()
 
+        this.emit('db-trans-start')
+
         const insert = this.db.prepare(
             'INSERT INTO duplicates (hash, file, preview, deleted) VALUES (@hash, @file, @preview, @deleted)'
         )
         const insertMany = this.db.transaction((duplicates) => {
-            for (const duplicate of duplicates) insert.run(duplicate)
+            for (const duplicate of duplicates) {
+                insert.run(duplicate)
+            }
         })
 
         const data: Omit<DuplicateModel, 'id'>[] = []
@@ -73,13 +82,35 @@ export class DuplicateManager extends EventEmitter {
                 data.push({
                     hash: duplicate.hash,
                     file: file,
-                    preview: await this.generatePreview(file),
+                    preview: null,
                     deleted: 0,
                 })
             }
         }
 
+        this.emit('preview-start')
+
+        const previews: (string | null)[] = []
+        const sizePerChunk = 50
+        const dataChunks = Array.from({ length: Math.ceil(data.length / sizePerChunk) }, (_, index) =>
+            data.slice(index * sizePerChunk, (index + 1) * sizePerChunk)
+        )
+
+        for (const [index, chunk] of dataChunks.entries()) {
+            const previewsChunk = await Promise.all(chunk.map((d) => this.generatePreview(d.file)))
+
+            previews.push(...previewsChunk)
+        }
+        
+        data.forEach((d, index) => {
+            d.preview = previews[index]!
+        })
+
+        this.emit('preview-end')
+
         insertMany(data)
+
+        this.emit('db-trans-end')
     }
 
     public async get() {
