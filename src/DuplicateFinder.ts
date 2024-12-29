@@ -12,14 +12,14 @@ export interface Options {
     bytes?: number
 }
 
-export interface DuplicateFinder {
-    on(event: 'scan', listener: (folder: string) => void): this
-    on(event: 'scan-result', listener: (folder: string, files: string[]) => void): this
-    on(event: 'files', listener: (files: string[]) => void): this
-    on(event: 'progress', listener: (iteration: number, total: number, file: string, hash: string) => void): this
+interface DuplicateFinderEvents {
+    'scan': [folder: string]
+    'scan-result': [folder: string, files: string[]]
+    'files': [files: string[]]
+    'progress': [iteration: number, total: number, file: string, hash: string]
 }
 
-export class DuplicateFinder extends EventEmitter {
+export class DuplicateFinder extends EventEmitter<DuplicateFinderEvents> {
     private folders: string[]
     private extensions: string[]
     private bytes: number
