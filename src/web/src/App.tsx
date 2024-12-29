@@ -9,6 +9,7 @@ function App() {
     const [alert, setAlert] = useState('')
     const [selectedDupIndex, setSelectedDupIndex] = useState<number>(0)
     const [selectedFileIndex, setSelectedFileIndex] = useState<number>(0)
+    const [showHelp, setShowHelp] = useState(true)
 
     useEffect(() => {
         function onConnect() {
@@ -192,7 +193,7 @@ function App() {
                                         className="w-16 h-6 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600"
                                         title="Open original file."
                                     >
-                                        <span>Open</span>
+                                        <span>[a] Open</span>
                                     </button>
 
                                     <button
@@ -202,7 +203,7 @@ function App() {
                                         className="w-16 h-6 text-xs text-white bg-green-500 rounded-lg hover:bg-green-600"
                                         title="Keep this file. Delete the others."
                                     >
-                                        <span>Keep</span>
+                                        <span>[s] Keep</span>
                                     </button>
 
                                     <button
@@ -212,7 +213,7 @@ function App() {
                                         className="w-16 h-6 text-xs text-white bg-red-500 rounded-lg hover:bg-red-600"
                                         title="Delete this file."
                                     >
-                                        <span>Delete</span>
+                                        <span>[d] Delete</span>
                                     </button>
                                 </div>
                             </div>
@@ -221,46 +222,98 @@ function App() {
                 </div>
             ))}
 
-            <div className="fixed bottom-0 right-0 p-4">
-                <div className="flex flex-col gap-2 p-4 bg-gray-700 border border-gray-700 rounded-lg shadow-lg">
-                    <div>What do each button does?</div>
+            {/* help */}
+            {showHelp && (
+                <div className="fixed bottom-0 right-0 p-4">
+                    <div className="relative flex flex-col gap-2 p-2 bg-gray-700 border border-gray-700 rounded-lg shadow-lg">
+                        {/* header */}
+                        <div className="flex flex-row items-center justify-between">
+                            <h2 className="font-semibold">How to use</h2>
+                            <button
+                                className="flex items-center justify-center w-6 h-6 bg-gray-700 rounded-lg hover:bg-gray-800"
+                                onClick={() => setShowHelp(false)}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="w-6 h-6 text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M6 18L18 6M6 6l12 12"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
 
-                    <div>
-                        <button
-                            className="w-16 h-6 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-                            title="Open original file."
-                        >
-                            <span>Open</span>
-                        </button>
-                        <span className="ml-2">Open original file.</span>
-                    </div>
+                        <div className="flex flex-col gap-2">
+                            <h2 className="text-sm font-semibold">What does each button do?</h2>
 
-                    <div>
-                        <button
-                            className="w-16 h-6 text-xs text-white bg-green-500 rounded-lg hover:bg-green-600"
-                            title="Keep this file. Delete the others."
-                        >
-                            <span>Keep</span>
-                        </button>
-                        <span className="ml-2">Keep one file. Delete the others.</span>
-                    </div>
+                            <div>
+                                <button
+                                    className="w-16 h-6 text-xs text-white bg-blue-500 rounded-lg "
+                                    title="Open original file."
+                                >
+                                    <span>[a] Open</span>
+                                </button>
+                                <span className="ml-2 text-sm">Open original file.</span>
+                            </div>
 
-                    <div>
-                        <button
-                            className="w-16 h-6 text-xs text-white bg-red-500 rounded-lg hover:bg-red-600"
-                            title="Delete this file."
-                        >
-                            <span>Delete</span>
-                        </button>
-                        <span className="ml-2">Delete this file.</span>
-                    </div>
+                            <div>
+                                <button
+                                    className="w-16 h-6 text-xs text-white bg-green-500 rounded-lg "
+                                    title="Keep this file. Delete the others."
+                                >
+                                    <span>[s] Keep</span>
+                                </button>
+                                <span className="ml-2 text-sm">Keep one file. Delete the others.</span>
+                            </div>
 
-                    {/* warnig */}
-                    <div className="text-sm text-red-500">
-                        Warning! All delete operations are permanent and without confirmation.
+                            <div>
+                                <button
+                                    className="w-16 h-6 text-xs text-white bg-red-500 rounded-lg "
+                                    title="Delete this file."
+                                >
+                                    <span>[d] Delete</span>
+                                </button>
+                                <span className="ml-2 text-sm">Delete this file.</span>
+                            </div>
+                        </div>
+
+                        <div className="p-2 bg-red-500 rounded-lg">
+                            <div className="text-sm">
+                                Warning! All delete operations are permanent and without confirmation.
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <h2 className="text-sm font-semibold">Keyboard shortcuts</h2>
+
+                            <p className="text-sm">
+                                You can use the <code className="p-1 bg-gray-800">Arrow</code> keys to navigate between
+                                duplicates and files. <br />
+                                Use the corresponding <code className="p-1 bg-gray-800">a, s, d</code> keys to perform
+                                actions.
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
+
+            {!showHelp && (
+                <div className="fixed bottom-0 right-0 p-4">
+                    <button
+                        className="w-16 h-6 text-xs text-white bg-gray-700 rounded-lg hover:bg-gray-800"
+                        onClick={() => setShowHelp(true)}
+                    >
+                        <span>Help?</span>
+                    </button>
+                </div>
+            )}
 
             {/* alert */}
             <div
