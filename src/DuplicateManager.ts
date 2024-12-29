@@ -153,6 +153,14 @@ export class DuplicateManager extends EventEmitter<DuplicateManagerEvents> {
             DuplicateModel,
             'hash' | 'file'
         >
+
+        const file = this.db.prepare('SELECT * FROM duplicates WHERE id = ?').get(id) as DuplicateModel
+
+        // check if file is already deleted
+        if (file.deleted === 1) {
+            return []
+        }
+
         const others = this.db
             .prepare('SELECT id FROM duplicates WHERE hash = ? AND id != ?')
             .all(duplicate.hash, id) as Pick<DuplicateModel, 'id'>[]
