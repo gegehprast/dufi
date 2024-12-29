@@ -13,10 +13,10 @@ export interface Options {
 }
 
 interface DuplicateFinderEvents {
-    'scan': [folder: string]
+    scan: [folder: string]
     'scan-result': [folder: string, files: string[]]
-    'files': [files: string[]]
-    'progress': [iteration: number, total: number, file: string, hash: string]
+    files: [files: string[]]
+    progress: [iteration: number, total: number, file: string, hash: string]
 }
 
 export class DuplicateFinder extends EventEmitter<DuplicateFinderEvents> {
@@ -68,21 +68,46 @@ export class DuplicateFinder extends EventEmitter<DuplicateFinderEvents> {
 
     private async findDuplicates(files: string[]) {
         const grouped: Duplicate[] = []
+        const chunkSize = 100
+        const chunckedFiles = Array.from({ length: Math.ceil(files.length / chunkSize) }, (_, index) =>
+            files.slice(index * chunkSize, (index + 1) * chunkSize)
+        )
+        const fileHashes: { [key: string]: string } = {}
 
-        for (const [i, file] of files.entries()) {
-            try {
-                const hash = await this.getFileHash(file)
-                const existingHash = grouped.find((h) => h.hash === hash)
+        for (const [index, chunk] of chunckedFiles.entries()) {
+            const hashes = await Promise.all(chunk.map((file) => this.getFileHash(file)))
+            const shouldBeCached: { file: string; hash: string }[] = []
 
-                if (existingHash) {
-                    existingHash.files.push(file)
-                } else {
-                    grouped.push({ hash, files: [file] })
+            for (const [i, hash] of hashes.entries()) {
+                const file = chunk[i]!
+
+                fileHashes[file] = hash.hash
+
+                if (!hash.cached) {
+                    shouldBeCached.push({ file, hash: hash.hash })
                 }
 
-                this.emit('progress', i + 1, files.length, file, hash)
-            } catch (error) {
-                console.error(`Error hashing file: ${file}`, error)
+                this.emit('progress', index * chunkSize + i + 1, files.length, file, hash.hash)
+            }
+
+            // cache hashes
+            let cacheLines: string = ''
+
+            for (const { file, hash } of shouldBeCached) {
+                cacheLines += `${file} ${hash}\n`
+                this.cachedHashes[file] = hash
+            }
+
+            fs.appendFileSync(CACHE_FILE, cacheLines)
+        }
+
+        for (const [file, hash] of Object.entries(fileHashes)) {
+            const found = grouped.find((h) => h.hash === hash)
+
+            if (found) {
+                found.files.push(file)
+            } else {
+                grouped.push({ hash, files: [file] })
             }
         }
 
@@ -92,7 +117,10 @@ export class DuplicateFinder extends EventEmitter<DuplicateFinderEvents> {
     private async getFileHash(file: string) {
         // check if file hash is cached
         if (this.cachedHashes[file]) {
-            return this.cachedHashes[file]
+            return {
+                hash: this.cachedHashes[file],
+                cached: true,
+            }
         }
 
         const fileSize = fs.statSync(file).size
@@ -126,11 +154,10 @@ export class DuplicateFinder extends EventEmitter<DuplicateFinderEvents> {
             return `${first16KbHash}-${last16KbHash}`
         })
 
-        // cache file hash
-        fs.appendFileSync(CACHE_FILE, `${file} ${hash}\n`)
-        this.cachedHashes[file] = hash
-
-        return hash
+        return {
+            hash,
+            cached: false,
+        }
     }
 
     private async getFiles() {
