@@ -1,5 +1,11 @@
 # dufi
 
+## 0.0.9
+
+### Patch Changes
+
+-   9f94a3e: check if file is already deleted before deleting others
+
 ## 0.0.8
 
 ### Patch Changes
