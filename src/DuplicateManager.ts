@@ -168,7 +168,16 @@ export class DuplicateManager extends EventEmitter<DuplicateManagerEvents> {
         const duplicate = this.db.prepare('SELECT file FROM duplicates WHERE id = ?').get(id) as DuplicateModel
 
         if (duplicate) {
-            fs.unlinkSync(duplicate.file)
+            try {
+                fs.unlinkSync(duplicate.file)
+            } catch (error: any) {
+                // check if error is file not found and ignore it
+                if (error.code === 'ENOENT') {
+                    return
+                }
+
+                throw error
+            }
         }
 
         this.db.prepare('UPDATE duplicates SET deleted = 1 WHERE id = ?').run(id)
