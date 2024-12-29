@@ -1,4 +1,7 @@
 # Dufi
+
+<img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/gegehprast/dufi/main.yml?logo=github&link=https%3A%2F%2Fgithub.com%2Fgegehprast%2Fdufi%2Factions%2Fworkflows%2Fmain.yml"> <img alt="NPM Release" src="https://img.shields.io/npm/v/dufi?logo=npm&color=blue&link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fdufi"> <img alt="GitHub Release" src="https://img.shields.io/github/v/release/gegehprast/dufi?logo=github&color=blue&link=https%3A%2F%2Fgithub.com%2Fgegehprast%2Fdufi%2Freleases">
+
 CLI application that helps you find and manage duplicate files.
 
 ## Table of Contents
