@@ -1,5 +1,12 @@
 # dufi
 
+## 0.0.6
+
+### Patch Changes
+
+-   a78018e: change scroll into view behaviour to instant
+-   8d20d68: Add background color to body
+
 ## 0.0.5
 
 ### Patch Changes
