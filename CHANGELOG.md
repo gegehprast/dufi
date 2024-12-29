@@ -1,5 +1,11 @@
 # dufi
 
+## 0.0.5
+
+### Patch Changes
+
+-   c3ee693: improve web ui
+
 ## 0.0.4
 
 ### Patch Changes
