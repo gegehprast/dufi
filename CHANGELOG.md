@@ -1,5 +1,11 @@
 # dufi
 
+## 0.0.8
+
+### Patch Changes
+
+-   a76dbcc: ignore deletion error when file doesn't exist
+
 ## 0.0.7
 
 ### Patch Changes
