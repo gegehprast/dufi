@@ -140,7 +140,7 @@ function App() {
                     ref={(el) => {
                         if (el && selectedDupIndex === dupIndex) {
                             el.scrollIntoView({
-                                behavior: 'smooth',
+                                behavior: 'instant',
                                 block: 'center',
                             })
                         }
