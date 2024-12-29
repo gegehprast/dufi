@@ -173,12 +173,12 @@ export default async function scan(folders: string[], options: { web: boolean, e
 
         manager.on('preview-start', () => {
             previewStartTime = Date.now()
-            console.log(chalk.blueBright('Starting preview generation...'))
+            console.log(chalk.blueBright('Generating previews...'))
         })
 
         manager.on('preview-end', () => {
             previewEndTime = Date.now()
-            console.log(chalk.blueBright(`Preview generation completed in ${((previewEndTime - previewStartTime) / 1000).toFixed(2)}s`))
+            console.log(chalk.blueBright(`Previews generated in ${((previewEndTime - previewStartTime) / 1000).toFixed(2)}s`))
         })
 
         await manager.init(duplicates)
