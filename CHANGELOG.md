@@ -1,5 +1,11 @@
 # dufi
 
+## 0.0.4
+
+### Patch Changes
+
+-   bc482cd: add button legends on web ui
+
 ## 0.0.3
 
 ### Patch Changes
