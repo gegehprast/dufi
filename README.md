@@ -4,6 +4,8 @@
 
 CLI application that helps you find and manage duplicate files.
 
+> :warning: **ALWAYS BACK UP YOUR DATA!** All delete operations are permanent and without confirmation.
+
 ## Table of Contents
 
 - [Features](#features)
