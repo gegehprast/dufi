@@ -7,6 +7,8 @@ function App() {
     const [duplicates, dispatchDuplicates] = useReducer(duplicatesReducer, [])
     const [showAlert, setShowAlert] = useState(false)
     const [alert, setAlert] = useState('')
+    const [selectedDupIndex, setSelectedDupIndex] = useState<number>(0)
+    const [selectedFileIndex, setSelectedFileIndex] = useState<number>(0)
 
     useEffect(() => {
         function onConnect() {
@@ -56,26 +58,42 @@ function App() {
 
     // show duplicate files
     return (
-        <div className="p-4">
+        <div className="p-4 text-white bg-gray-950">
             <h1 className="text-xl font-bold">
                 Dufi - Duplicates Manager ({isConnected ? `${duplicates.length} duplicates` : 'Connecting...'})
             </h1>
 
-            {duplicates.map((duplicate, index) => (
-                <div key={index} className="pb-2 mt-2 border-b hover:bg-slate-50">
+            {duplicates.map((duplicate, dupIndex) => (
+                <div
+                    key={dupIndex}
+                    className={`p-2 border-b border-gray-700 rounded ${
+                        selectedDupIndex === dupIndex ? 'bg-gray-800' : ''
+                    }`}
+                    onClick={() => setSelectedDupIndex(dupIndex)}
+                >
                     <h2 className="text-xs font-semibold">
-                        [{index + 1}] {duplicate.hash}
+                        [{dupIndex + 1}] {duplicate.hash}
                     </h2>
 
-                    <div className="flex flex-row items-center gap-4 overflow-x-auto">
-                        {duplicate.files.map((file, index) => (
-                            <div key={index} className="flex flex-col items-center gap-2 p-2 border w-96">
+                    <div className="flex flex-row items-center gap-4 p-1 mt-1 overflow-x-auto">
+                        {duplicate.files.map((file, fileIndex) => (
+                            <div
+                                key={fileIndex}
+                                className={`flex flex-col items-center gap-2 p-2 border border-gray-700 rounded w-96 ${
+                                    selectedDupIndex === dupIndex && selectedFileIndex === fileIndex
+                                        ? 'ring-4 ring-blue-600'
+                                        : ''
+                                }`}
+                                onClick={() => setSelectedFileIndex(fileIndex)}
+                            >
                                 {file.preview ? (
                                     <img
                                         src={file.preview}
                                         alt={file.file}
                                         title={file.file}
-                                        className={`object-cover h-56 ${file.deleted ? 'grayscale' : ''}`}
+                                        className={`object-cover h-56 pointer-events-none select-none ${
+                                            file.deleted ? 'grayscale' : ''
+                                        }`}
                                     />
                                 ) : (
                                     <div
@@ -99,7 +117,7 @@ function App() {
                                         type="text"
                                         value={file.file}
                                         readOnly
-                                        className="w-full h-6 p-1 text-xs bg-gray-100 rounded-lg cursor-pointer"
+                                        className="w-full h-6 p-1 text-xs bg-gray-700 rounded-lg cursor-pointer"
                                         onClick={async () => {
                                             await navigator.clipboard.writeText(file.file)
 
@@ -151,7 +169,7 @@ function App() {
             ))}
 
             <div className="fixed bottom-0 right-0 p-4">
-                <div className="flex flex-col gap-2 p-4 bg-white border rounded-lg shadow-lg">
+                <div className="flex flex-col gap-2 p-4 bg-gray-700 border border-gray-700 rounded-lg shadow-lg">
                     <div>What do each button does?</div>
 
                     <div>
