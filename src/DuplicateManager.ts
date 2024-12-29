@@ -34,14 +34,14 @@ export type GroupedDuplicate = {
     files: (Omit<DuplicateModel, 'hash' | 'deleted'> & { deleted: boolean })[]
 }
 
-export interface DuplicateManager {
-    on(event: 'db-trans-start', listener: () => void): this
-    on(event: 'db-trans-end', listener: () => void): this
-    on(event: 'preview-start', listener: () => void): this
-    on(event: 'preview-end', listener: () => void): this
+interface DuplicateManagerEvents {
+    'db-trans-start': []
+    'db-trans-end': []
+    'preview-start': []
+    'preview-end': []
 }
 
-export class DuplicateManager extends EventEmitter {
+export class DuplicateManager extends EventEmitter<DuplicateManagerEvents> {
     private db = new Database(DB_FILE)
 
     constructor() {
@@ -101,7 +101,7 @@ export class DuplicateManager extends EventEmitter {
 
             previews.push(...previewsChunk)
         }
-        
+
         data.forEach((d, index) => {
             d.preview = previews[index]!
         })
@@ -149,8 +149,13 @@ export class DuplicateManager extends EventEmitter {
     }
 
     public keep(id: number) {
-        const duplicate = this.db.prepare('SELECT hash, file FROM duplicates WHERE id = ?').get(id) as Pick<DuplicateModel, 'hash' | 'file'>
-        const others = this.db.prepare('SELECT id FROM duplicates WHERE hash = ? AND id != ?').all(duplicate.hash, id) as Pick<DuplicateModel, 'id'>[]
+        const duplicate = this.db.prepare('SELECT hash, file FROM duplicates WHERE id = ?').get(id) as Pick<
+            DuplicateModel,
+            'hash' | 'file'
+        >
+        const others = this.db
+            .prepare('SELECT id FROM duplicates WHERE hash = ? AND id != ?')
+            .all(duplicate.hash, id) as Pick<DuplicateModel, 'id'>[]
 
         for (const other of others) {
             this.delete(other.id)
