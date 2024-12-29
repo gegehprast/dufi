@@ -109,12 +109,17 @@ function App() {
                                     />
                                 </div>
 
-                                <div className={`flex flex-row items-center justify-center gap-2 ${file.deleted ? 'invisible' : ''}`}>
+                                <div
+                                    className={`flex flex-row items-center justify-center gap-2 ${
+                                        file.deleted ? 'invisible' : ''
+                                    }`}
+                                >
                                     <button
                                         onClick={() => {
                                             socket.emit('open', file.id)
                                         }}
                                         className="w-16 h-6 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                                        title="Open original file."
                                     >
                                         <span>Open</span>
                                     </button>
@@ -124,6 +129,7 @@ function App() {
                                             socket.emit('keep', file.id)
                                         }}
                                         className="w-16 h-6 text-xs text-white bg-green-500 rounded-lg hover:bg-green-600"
+                                        title="Keep this file. Delete the others."
                                     >
                                         <span>Keep</span>
                                     </button>
@@ -133,6 +139,7 @@ function App() {
                                             socket.emit('delete', file.id)
                                         }}
                                         className="w-16 h-6 text-xs text-white bg-red-500 rounded-lg hover:bg-red-600"
+                                        title="Delete this file."
                                     >
                                         <span>Delete</span>
                                     </button>
@@ -142,6 +149,47 @@ function App() {
                     </div>
                 </div>
             ))}
+
+            <div className="fixed bottom-0 right-0 p-4">
+                <div className="flex flex-col gap-2 p-4 bg-white border rounded-lg shadow-lg">
+                    <div>What do each button does?</div>
+
+                    <div>
+                        <button
+                            className="w-16 h-6 text-xs text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                            title="Open original file."
+                        >
+                            <span>Open</span>
+                        </button>
+                        <span className="ml-2">Open original file.</span>
+                    </div>
+
+                    <div>
+                        <button
+                            className="w-16 h-6 text-xs text-white bg-green-500 rounded-lg hover:bg-green-600"
+                            title="Keep this file. Delete the others."
+                        >
+                            <span>Keep</span>
+                        </button>
+                        <span className="ml-2">Keep one file. Delete the others.</span>
+                    </div>
+
+                    <div>
+                        <button
+                            className="w-16 h-6 text-xs text-white bg-red-500 rounded-lg hover:bg-red-600"
+                            title="Delete this file."
+                        >
+                            <span>Delete</span>
+                        </button>
+                        <span className="ml-2">Delete this file.</span>
+                    </div>
+
+                    {/* warnig */}
+                    <div className="text-sm text-red-500">
+                        Warning! All delete operations are permanent and without confirmation.
+                    </div>
+                </div>
+            </div>
 
             {/* alert */}
             <div
