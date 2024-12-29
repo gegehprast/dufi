@@ -1,5 +1,12 @@
 # dufi
 
+## 0.0.7
+
+### Patch Changes
+
+-   ee1d067: improve file hashing efficiency by processing files in chunks, ~50% faster
+-   4b10123: process previews in bulk chunks, ~30% faster
+
 ## 0.0.6
 
 ### Patch Changes
