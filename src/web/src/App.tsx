@@ -56,6 +56,51 @@ function App() {
         }
     }, [])
 
+    useEffect(() => {
+        const codes = ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'KeyA', 'KeyS', 'KeyD']
+
+        function handler(e: KeyboardEvent) {
+            if (codes.includes(e.code)) {
+                e.preventDefault()
+                e.stopPropagation()
+
+                switch (e.code) {
+                    case 'ArrowDown':
+                        setSelectedDupIndex((prev) => (prev + 1) % duplicates.length)
+                        break
+                    case 'ArrowUp':
+                        setSelectedDupIndex((prev) => (prev - 1 + duplicates.length) % duplicates.length)
+                        break
+                    case 'ArrowRight':
+                        setSelectedFileIndex((prev) => (prev + 1) % duplicates[selectedDupIndex].files.length)
+                        break
+                    case 'ArrowLeft':
+                        setSelectedFileIndex(
+                            (prev) =>
+                                (prev - 1 + duplicates[selectedDupIndex].files.length) %
+                                duplicates[selectedDupIndex].files.length
+                        )
+                        break
+                    case 'KeyA':
+                        socket.emit('open', duplicates[selectedDupIndex].files[selectedFileIndex].id)
+                        break
+                    case 'KeyS':
+                        socket.emit('keep', duplicates[selectedDupIndex].files[selectedFileIndex].id)
+                        break
+                    case 'KeyD':
+                        socket.emit('delete', duplicates[selectedDupIndex].files[selectedFileIndex].id)
+                        break
+                }
+            }
+        }
+
+        document.addEventListener('keydown', handler)
+
+        return () => {
+            document.removeEventListener('keydown', handler)
+        }
+    }, [duplicates, selectedDupIndex, selectedFileIndex])
+
     // show duplicate files
     return (
         <div className="p-4 text-white bg-gray-950">
@@ -70,6 +115,14 @@ function App() {
                         selectedDupIndex === dupIndex ? 'bg-gray-800' : ''
                     }`}
                     onClick={() => setSelectedDupIndex(dupIndex)}
+                    ref={(el) => {
+                        if (el && selectedDupIndex === dupIndex) {
+                            el.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center',
+                            })
+                        }
+                    }}
                 >
                     <h2 className="text-xs font-semibold">
                         [{dupIndex + 1}] {duplicate.hash}
